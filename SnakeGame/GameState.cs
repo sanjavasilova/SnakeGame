@@ -99,5 +99,47 @@ namespace SnakeGame
         {
             Dir = direction;
         }
+
+        private bool OutsideGrid(Position position)
+        {
+            return position.Row < 0 || position.Row >= Rows || position.Column < 0 || position.Column >=Columns;
+        }
+
+        private GridValue Hit(Position newHeadPosition)
+        {
+            if (OutsideGrid(newHeadPosition))
+            {
+                return GridValue.Out;
+            }
+
+            if(newHeadPosition == TailPosition())
+            {
+                return GridValue.Empty;
+            }
+
+            return Grid[newHeadPosition.Row, newHeadPosition.Column];
+        }
+
+        public void Move()
+        {
+            Position newHeadPos = HeadPosition().Translate(Dir);
+            GridValue hit = Hit(newHeadPos);
+
+            if (hit == GridValue.Out || hit == GridValue.Snake)
+            {
+                GameOver = true;
+            }
+            else if (hit == GridValue.Empty)
+            {
+                RemoveTail();
+                AddHead(newHeadPos);
+            }
+            else if (hit == GridValue.Apple)
+            {
+                AddHead(newHeadPos);
+                Score++;
+                AddFood();
+            }
+        }
     }
 }
