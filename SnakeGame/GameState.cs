@@ -24,6 +24,80 @@ namespace SnakeGame
             Columns = cols;
             Grid = new GridValue[Rows, Columns];
             Dir = Direction.Right;
+
+            AddSnake();
+            AddFood();
+        }
+
+        private void AddSnake()
+        {
+            int r = Rows / 2;
+
+            for(int c=1; c <= 3; c++)
+            {
+                Grid[r, c] = GridValue.Snake;
+                snakePosition.AddFirst(new Position(r, c));
+            }
+        }
+
+        private IEnumerable<Position> emptyPositions()
+        {
+            for (int r=0;r<Rows; r++)
+            {
+                for(int c = 0; c < Columns; c++)
+                {
+                    if (Grid[r, c] == GridValue.Empty)
+                    {
+                        yield return new Position(r, c);
+                    }
+                }
+            }
+        }
+
+        private void AddFood()
+        {
+            List<Position> empty = new List<Position>(emptyPositions());
+
+            if(empty.Count == 0)
+            {
+                return;
+            }
+
+            Position Position = empty[Random.Next(empty.Count)];
+            Grid[Position.Row, Position.Column] = GridValue.Apple;
+        }
+
+        public Position HeadPosition()
+        {
+            return snakePosition.First.Value;
+        }
+
+        public Position TailPosition()
+        {
+            return snakePosition.Last.Value;
+        }
+
+        public IEnumerable<Position> SnakePositions()
+        {
+            return snakePosition;
+        }
+
+        private void AddHead(Position position)
+        {
+            snakePosition.AddFirst(position);
+            Grid[position.Row, position.Column] = GridValue.Snake;
+        }
+
+        private void RemoveTail()
+        {
+            Position tail = snakePosition.Last.Value;
+            Grid[tail.Row, tail.Column] = GridValue.Empty;
+            snakePosition.RemoveLast();
+        }
+
+        public void ChangeDirection(Direction direction)
+        {
+            Dir = direction;
         }
     }
 }
