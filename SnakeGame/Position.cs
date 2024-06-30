@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SnakeGame
 {
     public class Position
     {
-        public int Row {  get; set; }
+        public int Row { get; set; }
         public int Column { get; set; }
 
         public Position(int row, int column)
@@ -17,9 +14,9 @@ namespace SnakeGame
             Column = column;
         }
 
-        public Position Translate (Direction direction)
+        public Position Translate(Direction direction)
         {
-            return new Position(Row + direction.RowOffSet, Column + direction.ColOffSet);
+            return new Position(Row + direction.RowOffset, Column + direction.ColumnOffset);
         }
 
         public override bool Equals(object obj)
@@ -31,10 +28,8 @@ namespace SnakeGame
 
         public override int GetHashCode()
         {
-            int hashCode = 240067226;
-            hashCode = hashCode * -1521134295 + Row.GetHashCode();
-            hashCode = hashCode * -1521134295 + Column.GetHashCode();
-            return hashCode;
+            // Simple hash code calculation
+            return Row.GetHashCode() ^ Column.GetHashCode();
         }
 
         public static bool operator ==(Position left, Position right)

@@ -117,22 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BackgroundColor" xml:space="preserve">
-    <value>#211E2B</value>
-  </data>
-  <data name="GridBackgroundColor" xml:space="preserve">
-    <value>#312C40</value>
-  </data>
-  <data name="GridLineColor" xml:space="preserve">
-    <value>#4F4867</value>
-  </data>
-  <data name="MainFont" xml:space="preserve">
-    <value>Droid Sans Mono</value>
-  </data>
-  <data name="OverlayColor" xml:space="preserve">
-    <value>#7F000000</value>
-  </data>
-  <data name="TextColor" xml:space="preserve">
-    <value>#EBEBEB</value>
-  </data>
 </root>

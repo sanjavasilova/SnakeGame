@@ -1,44 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SnakeGame
 {
     public class Direction
     {
-        public readonly static Direction Left = new Direction(0, -1);
-        public readonly static Direction Right = new Direction(0, 1);
-        public readonly static Direction Up = new Direction(-1, 0);
-        public readonly static Direction Down = new Direction(1, 0);
+        public static readonly Direction Left = new Direction(0, -1);
+        public static readonly Direction Right = new Direction(0, 1);
+        public static readonly Direction Up = new Direction(-1, 0);
+        public static readonly Direction Down = new Direction(1, 0);
 
-        public int RowOffSet { get; set; }
-        public int ColOffSet { get; set; }
+        public int RowOffset { get; }
+        public int ColumnOffset { get; }
 
-        private Direction(int rowOffSet, int colOffSet)
+        private Direction(int rowOffset, int columnOffset)
         {
-            RowOffSet = rowOffSet;
-            ColOffSet = colOffSet;
+            RowOffset = rowOffset;
+            ColumnOffset = columnOffset;
         }
 
         public Direction Opposite()
         {
-            return new Direction(-RowOffSet, -ColOffSet);
+            return new Direction(-RowOffset, -ColumnOffset);
+        }
+
+        public bool IsOpposite(Direction other)
+        {
+            return this.Opposite() == other;
         }
 
         public override bool Equals(object obj)
         {
             return obj is Direction direction &&
-                   RowOffSet == direction.RowOffSet &&
-                   ColOffSet == direction.ColOffSet;
+                   RowOffset == direction.RowOffset &&
+                   ColumnOffset == direction.ColumnOffset;
         }
 
         public override int GetHashCode()
         {
             int hashCode = -1983741850;
-            hashCode = hashCode * -1521134295 + RowOffSet.GetHashCode();
-            hashCode = hashCode * -1521134295 + ColOffSet.GetHashCode();
+            hashCode = hashCode * -1521134295 + RowOffset.GetHashCode();
+            hashCode = hashCode * -1521134295 + ColumnOffset.GetHashCode();
             return hashCode;
         }
 
