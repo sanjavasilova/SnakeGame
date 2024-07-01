@@ -28,7 +28,6 @@ namespace SnakeGame
 
         public override int GetHashCode()
         {
-            // Simple hash code calculation
             return Row.GetHashCode() ^ Column.GetHashCode();
         }
 

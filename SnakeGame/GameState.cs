@@ -173,6 +173,6 @@ public class GameState
         }
 
         double occupiedPercentage = (double)occupiedCells / totalCells;
-        return occupiedPercentage >= 0.05; 
+        return occupiedPercentage >= 0.5; 
     }
 }
