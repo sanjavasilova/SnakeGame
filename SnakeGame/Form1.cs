@@ -7,12 +7,15 @@ namespace SnakeGame
 {
     public partial class Form1 : Form
     {
+        private int bestScore = 0;
         GameState gameState;
         private readonly int rows = 15, cols = 15;
         private PictureBox[,] pictureBoxes;
         private Timer gameTickTimer;
-        private Label gameOverLabel;  
-
+        private Label gameOverLabel;
+        private Button startOverButton;
+        private Label winLabel;
+        private bool won=false;
         public Form1()
         {
             InitializeComponent();
@@ -24,7 +27,7 @@ namespace SnakeGame
             UpdateScore();
 
             gameTickTimer = new Timer();
-            gameTickTimer.Interval = 200;  
+            gameTickTimer.Interval = 300;  
             gameTickTimer.Tick += GameTick_Tick;
             gameTickTimer.Start();
 
@@ -41,9 +44,34 @@ namespace SnakeGame
                 AutoSize = true,
                 Visible = false  
             };
+            winLabel = new Label
+            {
+                Text = "YOU WON :)!!!",
+                ForeColor = Color.Green,
+                Font = new Font("Arial", 24, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Visible = false
+            };
             this.Controls.Add(gameOverLabel);
+            this.Controls.Add(winLabel);
+
+            //startOver
+            startOverButton = new Button
+            {
+                Text = "Start Over",
+                ForeColor = Color.Red,
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                BackColor = Color.LightGray,
+                AutoSize = true,
+                Visible = false
+            };
+            startOverButton.Click += StartOverButton_Click;
+            this.Controls.Add(startOverButton);
 
             this.Controls.SetChildIndex(gameOverLabel, 0);
+            this.Controls.SetChildIndex(startOverButton, 1);
+            this.Controls.SetChildIndex(winLabel, 2);
         }
 
         private void InitializeGameResources()
@@ -84,9 +112,10 @@ namespace SnakeGame
                 direction = Direction.Down;
             }
 
-            if (direction != null && direction != gameState.Dir.Opposite())
+            if (direction != null && direction != gameState.Dir.Opposite() && direction != gameState.Dir)
             {
                 gameState.ChangeDirection(direction);
+                moveOnTick();
             }
         }
 
@@ -187,34 +216,74 @@ namespace SnakeGame
 
         private void UpdateScore()
         {
-            lblScore.Text = $"Score: {gameState.Score}";
+            if (gameState.Score > bestScore)
+            {
+                bestScore = gameState.Score;
+            }
+            lblScore.Text = $"SCORE: {gameState.Score}";
+            lblBestScore.Text = $"BEST SCORE: {bestScore}";
         }
 
-        private void GameTick_Tick(object sender, EventArgs e)
+        private void moveOnTick()
         {
+            gameState.Move();
+            UpdateGrid();
+            UpdateScore();
             if (!gameState.GameOver)
             {
-                gameState.Move();
-                UpdateGrid();
-                UpdateScore();
                 if (gameState.CheckWinCondition())
                 {
                     gameTickTimer.Stop();
-                    MessageBox.Show("You Win!");
+                    won = true;
+                    ShowGameOverText();
                 }
             }
             else
             {
                 gameTickTimer.Stop();
+                won = false;
                 ShowGameOverText();
             }
         }
 
+        private void GameTick_Tick(object sender, EventArgs e)
+        {
+            moveOnTick();
+        }
+
         private void ShowGameOverText()
         {
-            gameOverLabel.Visible = true;
-            gameOverLabel.Left = (this.ClientSize.Width - gameOverLabel.Width) / 2;
-            gameOverLabel.Top = (this.ClientSize.Height - gameOverLabel.Height) / 2;
+            if(!won){
+                gameOverLabel.Visible = true;
+                gameOverLabel.Left = (this.ClientSize.Width - gameOverLabel.Width) / 2;
+                gameOverLabel.Top = (this.ClientSize.Height - gameOverLabel.Height) / 2;
+            }
+            else
+            {
+                winLabel.Visible = true;
+                winLabel.Left = (this.ClientSize.Width - gameOverLabel.Width) / 2;
+                winLabel.Top = (this.ClientSize.Height - gameOverLabel.Height) / 2;
+            }
+
+            startOverButton.Visible = true;
+            startOverButton.Left = (this.ClientSize.Width - startOverButton.Width) / 2;
+            startOverButton.Top = gameOverLabel.Bottom + 10;
+
+            startOverButton.BringToFront();
+        }
+        private void StartOverButton_Click(object sender, EventArgs e)
+        {
+            gameState = new GameState(rows, cols);
+
+            UpdateGrid();
+            UpdateScore();
+
+            gameOverLabel.Visible = false;
+            startOverButton.Visible = false;
+            winLabel.Visible = false;
+            this.Focus();
+            gameTickTimer.Start();
+
         }
 
         private void Form1_Resize(object sender, EventArgs e)

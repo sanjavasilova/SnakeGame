@@ -62,7 +62,7 @@ public class GameState
         Position position = empty[random.Next(empty.Count)];
         Grid[position.Row, position.Column] = GridValue.Apple;
 
-        var timer = new System.Timers.Timer(3000);
+        var timer = new System.Timers.Timer(5000);
         timer.Elapsed += (sender, e) =>
         {
             if (Grid[position.Row, position.Column] == GridValue.Apple)
@@ -173,6 +173,6 @@ public class GameState
         }
 
         double occupiedPercentage = (double)occupiedCells / totalCells;
-        return occupiedPercentage >= 0.50; 
+        return occupiedPercentage >= 0.05; 
     }
 }
