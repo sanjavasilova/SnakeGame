@@ -7,7 +7,7 @@ public static class Images
     public static readonly Image Empty = LoadImage("Empty.png");
     public static readonly Image Body = LoadImage("Body.png");
     public static readonly Image Head = LoadImage("Head.png");
-    public static readonly Image Food = LoadImage("Food.png");
+    public static readonly Image Food = LoadImage("Apple.png");
     public static readonly Image DeadBody = LoadImage("DeadBody.png");
     public static readonly Image DeadHead = LoadImage("DeadHead.png");
 
@@ -19,7 +19,7 @@ public static class Images
             throw new FileNotFoundException($"Image file '{fileName}' not found at path '{path}'.");
         }
         Image image = Image.FromFile(path);
-        return ResizeImage(image, 30, 30);  
+        return ResizeImage(image, 25, 25);  
     }
 
     private static Image ResizeImage(Image image, int width, int height)

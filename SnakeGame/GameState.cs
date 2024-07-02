@@ -138,11 +138,11 @@ public class GameState
 
         if (hit == GridValue.Out || hit == GridValue.Snake)
         {
-            Grid[HeadPosition().Row, HeadPosition().Column] = GridValue.DeadHead; 
             foreach (var position in snakePosition)
             {
-                Grid[position.Row, position.Column] = GridValue.DeadBody; 
+                Grid[position.Row, position.Column] = GridValue.DeadBody;
             }
+            Grid[HeadPosition().Row, HeadPosition().Column] = GridValue.DeadHead;
             GameOver = true;
         }
         else if (hit == GridValue.Empty)

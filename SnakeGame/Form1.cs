@@ -8,70 +8,20 @@ namespace SnakeGame
     public partial class Form1 : Form
     {
         private int bestScore = 0;
-        GameState gameState;
         private readonly int rows = 15, cols = 15;
+        private GameState gameState;
         private PictureBox[,] pictureBoxes;
         private Timer gameTickTimer;
         private Label gameOverLabel;
-        private Button startOverButton;
         private Label winLabel;
-        private bool won=false;
+        private Button startOverButton;
+        private bool won = false;
+
         public Form1()
         {
             InitializeComponent();
             InitializeGameResources();
-            gameState = new GameState(rows, cols);
-            InitializeTableLayoutPanel();
-            pictureBoxes = SetupGrid();  
-            UpdateGrid();
-            UpdateScore();
-
-            gameTickTimer = new Timer();
-            gameTickTimer.Interval = 300;  
-            gameTickTimer.Tick += GameTick_Tick;
-            gameTickTimer.Start();
-
-            this.KeyDown += new KeyEventHandler(Form1_KeyDown);
-
-            this.Resize += Form1_Resize;
-
-            gameOverLabel = new Label
-            {
-                Text = "GAME OVER",
-                ForeColor = Color.Red,
-                Font = new Font("Arial", 24, FontStyle.Bold),
-                BackColor = Color.Transparent,
-                AutoSize = true,
-                Visible = false  
-            };
-            winLabel = new Label
-            {
-                Text = "YOU WON :)!!!",
-                ForeColor = Color.Green,
-                Font = new Font("Arial", 24, FontStyle.Bold),
-                BackColor = Color.Transparent,
-                AutoSize = true,
-                Visible = false
-            };
-            this.Controls.Add(gameOverLabel);
-            this.Controls.Add(winLabel);
-
-            //startOver
-            startOverButton = new Button
-            {
-                Text = "Start Over",
-                ForeColor = Color.Red,
-                Font = new Font("Arial", 14, FontStyle.Bold),
-                BackColor = Color.LightGray,
-                AutoSize = true,
-                Visible = false
-            };
-            startOverButton.Click += StartOverButton_Click;
-            this.Controls.Add(startOverButton);
-
-            this.Controls.SetChildIndex(gameOverLabel, 0);
-            this.Controls.SetChildIndex(startOverButton, 1);
-            this.Controls.SetChildIndex(winLabel, 2);
+            InitializeGame();
         }
 
         private void InitializeGameResources()
@@ -80,6 +30,7 @@ namespace SnakeGame
             this.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
             this.Font = new Font("Droid Sans Mono", 12, FontStyle.Regular);
             this.StartPosition = FormStartPosition.CenterScreen;
+
             string iconFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Icon.ico");
             if (File.Exists(iconFilePath))
             {
@@ -89,6 +40,114 @@ namespace SnakeGame
             {
                 MessageBox.Show("Icon file not found.");
             }
+        }
+
+        private void InitializeGame()
+        {
+            gameState = new GameState(rows, cols);
+            InitializeTableLayoutPanel();
+            pictureBoxes = SetupGrid();
+            UpdateGrid();
+            UpdateScore();
+
+            InitializeTimers();
+            InitializeLabelsAndButtons();
+        }
+
+        private void InitializeTableLayoutPanel()
+        {
+            tableGrid.BackColor = ColorTranslator.FromHtml(Properties.Resources.GridBackgroundColor);
+            tableGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            tableGrid.ColumnStyles.Clear();
+            tableGrid.RowStyles.Clear();
+
+            for (int i = 0; i < cols; i++)
+            {
+                tableGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 30));
+            }
+            for (int i = 0; i < rows; i++)
+            {
+                tableGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+            }
+        }
+
+        private PictureBox[,] SetupGrid()
+        {
+            PictureBox[,] grid = new PictureBox[rows, cols];
+            tableGrid.RowCount = rows;
+            tableGrid.ColumnCount = cols;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    PictureBox pictureBox = new PictureBox
+                    {
+                        Dock = DockStyle.Fill,
+                        BackColor = Color.Transparent,
+                        Image = Images.Empty
+                    };
+
+                    tableGrid.Controls.Add(pictureBox, c, r);
+                    grid[r, c] = pictureBox;
+                }
+            }
+
+            return grid;
+        }
+        private void InitializeTimers()
+        {
+            this.DoubleBuffered = true;
+            gameTickTimer = new Timer();
+            gameTickTimer.Interval = 200;
+            gameTickTimer.Tick += GameTick_Tick;
+            gameTickTimer.Start();
+        }
+
+        private void InitializeLabelsAndButtons()
+        {
+            gameOverLabel = CreateLabel("GAME OVER", Color.Red);
+            winLabel = CreateLabel("YOU WON :)!!!", Color.Green);
+            startOverButton = CreateButton("Start Over", StartOverButton_Click);
+
+            this.Controls.Add(gameOverLabel);
+            this.Controls.Add(winLabel);
+            this.Controls.Add(startOverButton);
+
+            this.Controls.SetChildIndex(gameOverLabel, 0);
+            this.Controls.SetChildIndex(startOverButton, 1);
+            this.Controls.SetChildIndex(winLabel, 2);
+
+            this.KeyDown += new KeyEventHandler(Form1_KeyDown);
+            this.Resize += Form1_Resize;
+        }
+
+        private Label CreateLabel(string text, Color color)
+        {
+            return new Label
+            {
+                Text = text,
+                ForeColor = color,
+                Font = new Font("Arial", 24, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Visible = false
+            };
+        }
+
+        private Button CreateButton(string text, EventHandler clickHandler)
+        {
+            Button button = new Button
+            {
+                Text = text,
+                ForeColor = Color.Red,
+                Font = new Font("Arial", 14, FontStyle.Bold),
+                BackColor = Color.LightGray,
+                AutoSize = true,
+                Visible = false
+            };
+            button.Click += clickHandler;
+            return button;
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -114,56 +173,32 @@ namespace SnakeGame
 
             if (direction != null && direction != gameState.Dir.Opposite() && direction != gameState.Dir)
             {
+                gameTickTimer.Stop();
                 gameState.ChangeDirection(direction);
-                moveOnTick();
+                MoveOnTick();
+                gameTickTimer.Start();
             }
         }
 
-        private void InitializeTableLayoutPanel()
+        private void GameTick_Tick(object sender, EventArgs e)
         {
-            tableGrid.BackColor = ColorTranslator.FromHtml(Properties.Resources.GridBackgroundColor);
-            tableGrid.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
-
-            tableGrid.ColumnStyles.Clear();
-            tableGrid.RowStyles.Clear();
-
-            for (int i = 0; i < cols; i++)
-            {
-                tableGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 30));  
-            }
-
-            for (int i = 0; i < rows; i++)
-            {
-                tableGrid.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));  
-            }
+            MoveOnTick();
         }
 
-        private PictureBox[,] SetupGrid()
+        private void Form1_Resize(object sender, EventArgs e)
         {
-            PictureBox[,] pictureBoxes = new PictureBox[rows, cols];
-            tableGrid.RowCount = rows;
-            tableGrid.ColumnCount = cols;
+            tableGrid.Invalidate();
 
-            for (int r = 0; r < rows; r++)
+            if (gameState.GameOver)
             {
-                for (int c = 0; c < cols; c++)
-                {
-                    PictureBox pictureBox = new PictureBox
-                    {
-                        Dock = DockStyle.Fill,
-                        BackColor = Color.Transparent,  
-                        Image = Images.Empty  
-                    };
-
-                    tableGrid.Controls.Add(pictureBox, c, r);
-
-                    pictureBoxes[r, c] = pictureBox;
-                }
+                ShowGameOverText();
             }
-
-            return pictureBoxes;
         }
 
+        private void StartOverButton_Click(object sender, EventArgs e)
+        {
+            ResetGame();
+        }
         private void UpdateGrid()
         {
             for (int r = 0; r < rows; r++)
@@ -175,13 +210,13 @@ namespace SnakeGame
 
                     if (value == GridValue.Snake)
                     {
-                        if (gameState.HeadPosition().Row == r && gameState.HeadPosition().Column == c)
+                        if(gameState.HeadPosition().Row == r && gameState.HeadPosition().Column == c)
                         {
                             pictureBox.Image = Images.Head;
                         }
                         else
                         {
-                            pictureBox.Image = Images.Body; 
+                            pictureBox.Image = Images.Body;
                         }
                     }
                     else if (value == GridValue.Apple)
@@ -224,21 +259,19 @@ namespace SnakeGame
             lblBestScore.Text = $"BEST SCORE: {bestScore}";
         }
 
-        private void moveOnTick()
+        private void MoveOnTick()
         {
             gameState.Move();
             UpdateGrid();
             UpdateScore();
-            if (!gameState.GameOver)
+
+            if (!gameState.GameOver && gameState.CheckWinCondition())
             {
-                if (gameState.CheckWinCondition())
-                {
-                    gameTickTimer.Stop();
-                    won = true;
-                    ShowGameOverText();
-                }
+                gameTickTimer.Stop();
+                won = true;
+                ShowGameOverText();
             }
-            else
+            else if (gameState.GameOver)
             {
                 gameTickTimer.Stop();
                 won = false;
@@ -246,54 +279,38 @@ namespace SnakeGame
             }
         }
 
-        private void GameTick_Tick(object sender, EventArgs e)
-        {
-            moveOnTick();
-        }
-
         private void ShowGameOverText()
         {
-            if(!won){
-                gameOverLabel.Visible = true;
-                gameOverLabel.Left = (this.ClientSize.Width - gameOverLabel.Width) / 2;
-                gameOverLabel.Top = (this.ClientSize.Height - gameOverLabel.Height) / 2;
+            Label label;
+            if (won)
+            {
+                label = winLabel;
             }
             else
             {
-                winLabel.Visible = true;
-                winLabel.Left = (this.ClientSize.Width - gameOverLabel.Width) / 2;
-                winLabel.Top = (this.ClientSize.Height - gameOverLabel.Height) / 2;
+                label = gameOverLabel;
             }
+            label.Visible = true;
+            label.Left = (this.ClientSize.Width - label.Width) / 2;
+            label.Top = (this.ClientSize.Height - label.Height) / 2;
 
             startOverButton.Visible = true;
             startOverButton.Left = (this.ClientSize.Width - startOverButton.Width) / 2;
-            startOverButton.Top = gameOverLabel.Bottom + 10;
-
+            startOverButton.Top = label.Bottom + 10;
             startOverButton.BringToFront();
         }
-        private void StartOverButton_Click(object sender, EventArgs e)
+
+        private void ResetGame()
         {
             gameState = new GameState(rows, cols);
-
             UpdateGrid();
             UpdateScore();
 
             gameOverLabel.Visible = false;
-            startOverButton.Visible = false;
             winLabel.Visible = false;
+            startOverButton.Visible = false;
             this.Focus();
             gameTickTimer.Start();
-
-        }
-
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-            tableGrid.Invalidate(); 
-
-            if (gameState.GameOver)
-            {
-                ShowGameOverText();
-            }
         }
     }
 }
