@@ -13,10 +13,14 @@ namespace SnakeGame
         private PictureBox[,] pictureBoxes;
         private Timer gameTickTimer;
         private Label gameOverLabel;
+        private Label gamePausedLabel;
         private Label winLabel;
         private Button startOverButton;
+        private Button startGameButton;
         private bool won = false;
-
+        private int snakeSpeed = 350;
+        private bool gameIsPaused = true;
+        private bool gameIsRunning = false;
         public Form1()
         {
             InitializeComponent();
@@ -30,6 +34,8 @@ namespace SnakeGame
             this.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
             this.Font = new Font("Droid Sans Mono", 12, FontStyle.Regular);
             this.StartPosition = FormStartPosition.CenterScreen;
+            this.menuStrip1.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
+            
 
             string iconFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Icon.ico");
             if (File.Exists(iconFilePath))
@@ -52,6 +58,12 @@ namespace SnakeGame
 
             InitializeTimers();
             InitializeLabelsAndButtons();
+
+            startGameButton.Visible = true;
+            startGameButton.Left = (this.ClientSize.Width - startGameButton.Width) / 2;
+            startGameButton.Top = (this.ClientSize.Height - startGameButton.Height) / 2;
+
+            startGameButton.BringToFront();
         }
 
         private void InitializeTableLayoutPanel()
@@ -99,7 +111,7 @@ namespace SnakeGame
         {
             this.DoubleBuffered = true;
             gameTickTimer = new Timer();
-            gameTickTimer.Interval = 200;
+            gameTickTimer.Interval = snakeSpeed;
             gameTickTimer.Tick += GameTick_Tick;
             gameTickTimer.Start();
         }
@@ -107,16 +119,22 @@ namespace SnakeGame
         private void InitializeLabelsAndButtons()
         {
             gameOverLabel = CreateLabel("GAME OVER", Color.Red);
+            gamePausedLabel = CreateLabel("GAME PAUSED", Color.Red);
             winLabel = CreateLabel("YOU WON :)!!!", Color.Green);
             startOverButton = CreateButton("Start Over", StartOverButton_Click);
+            startGameButton = CreateButton("Start Game", StartGameButton_Click);
 
             this.Controls.Add(gameOverLabel);
             this.Controls.Add(winLabel);
             this.Controls.Add(startOverButton);
+            this.Controls.Add(startGameButton);
+            this.Controls.Add(gamePausedLabel);
 
             this.Controls.SetChildIndex(gameOverLabel, 0);
             this.Controls.SetChildIndex(startOverButton, 1);
             this.Controls.SetChildIndex(winLabel, 2);
+            this.Controls.SetChildIndex(gamePausedLabel, 3);
+            this.Controls.SetChildIndex(startGameButton, 4);
 
             this.KeyDown += new KeyEventHandler(Form1_KeyDown);
             this.Resize += Form1_Resize;
@@ -152,31 +170,34 @@ namespace SnakeGame
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            Direction direction = null;
+            if (!gameIsPaused && gameIsRunning)
+            {
+                Direction direction = null;
 
-            if (e.KeyCode == Keys.Left)
-            {
-                direction = Direction.Left;
-            }
-            else if (e.KeyCode == Keys.Right)
-            {
-                direction = Direction.Right;
-            }
-            else if (e.KeyCode == Keys.Up)
-            {
-                direction = Direction.Up;
-            }
-            else if (e.KeyCode == Keys.Down)
-            {
-                direction = Direction.Down;
-            }
+                if (e.KeyCode == Keys.Left)
+                {
+                    direction = Direction.Left;
+                }
+                else if (e.KeyCode == Keys.Right)
+                {
+                    direction = Direction.Right;
+                }
+                else if (e.KeyCode == Keys.Up)
+                {
+                    direction = Direction.Up;
+                }
+                else if (e.KeyCode == Keys.Down)
+                {
+                    direction = Direction.Down;
+                }
 
-            if (direction != null && direction != gameState.Dir.Opposite() && direction != gameState.Dir)
-            {
-                gameTickTimer.Stop();
-                gameState.ChangeDirection(direction);
-                MoveOnTick();
-                gameTickTimer.Start();
+                if (direction != null && direction != gameState.Dir.Opposite() && direction != gameState.Dir)
+                {
+                    gameTickTimer.Stop();
+                    gameState.ChangeDirection(direction);
+                    MoveOnTick();
+                    gameTickTimer.Start();
+                }
             }
         }
 
@@ -199,54 +220,65 @@ namespace SnakeGame
         {
             ResetGame();
         }
+        private void StartGameButton_Click(Object sender, EventArgs e)
+        {
+            if (!gameIsRunning)
+            {
+                startGameButton.Visible = false;
+                gameIsRunning = true;
+                gameIsPaused = false;
+                this.Focus();
+
+            }
+        }
         private void UpdateGrid()
         {
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
+                for (int r = 0; r < rows; r++)
                 {
-                    GridValue value = gameState.Grid[r, c];
-                    PictureBox pictureBox = pictureBoxes[r, c];
-
-                    if (value == GridValue.Snake)
+                    for (int c = 0; c < cols; c++)
                     {
-                        if(gameState.HeadPosition().Row == r && gameState.HeadPosition().Column == c)
+                        GridValue value = gameState.Grid[r, c];
+                        PictureBox pictureBox = pictureBoxes[r, c];
+
+                        if (value == GridValue.Snake)
                         {
-                            pictureBox.Image = Images.Head;
+                            if (gameState.HeadPosition().Row == r && gameState.HeadPosition().Column == c)
+                            {
+                                pictureBox.Image = Images.Head;
+                            }
+                            else
+                            {
+                                pictureBox.Image = Images.Body;
+                            }
+                        }
+                        else if (value == GridValue.Apple)
+                        {
+                            pictureBox.Image = Images.Food;
+                        }
+                        else if (value == GridValue.Out)
+                        {
+                            pictureBox.Image = Images.DeadBody;
+                        }
+                        else if (value == GridValue.DeadHead)
+                        {
+                            pictureBox.Image = Images.DeadHead;
+                        }
+                        else if (value == GridValue.DeadBody)
+                        {
+                            pictureBox.Image = Images.DeadBody;
                         }
                         else
                         {
-                            pictureBox.Image = Images.Body;
+                            pictureBox.Image = Images.Empty;
                         }
                     }
-                    else if (value == GridValue.Apple)
-                    {
-                        pictureBox.Image = Images.Food;
-                    }
-                    else if (value == GridValue.Out)
-                    {
-                        pictureBox.Image = Images.DeadBody;
-                    }
-                    else if (value == GridValue.DeadHead)
-                    {
-                        pictureBox.Image = Images.DeadHead;
-                    }
-                    else if (value == GridValue.DeadBody)
-                    {
-                        pictureBox.Image = Images.DeadBody;
-                    }
-                    else
-                    {
-                        pictureBox.Image = Images.Empty;
-                    }
                 }
-            }
 
-            if (gameState.GameOver)
-            {
-                ShowGameOverText();
-                gameTickTimer.Stop();
-            }
+                if (gameState.GameOver)
+                {
+                    ShowGameOverText();
+                    gameTickTimer.Stop();
+                }
         }
 
         private void UpdateScore()
@@ -261,21 +293,24 @@ namespace SnakeGame
 
         private void MoveOnTick()
         {
-            gameState.Move();
-            UpdateGrid();
-            UpdateScore();
+            if (!gameIsPaused && gameIsRunning)
+            {
+                gameState.Move();
+                UpdateGrid();
+                UpdateScore();
 
-            if (!gameState.GameOver && gameState.CheckWinCondition())
-            {
-                gameTickTimer.Stop();
-                won = true;
-                ShowGameOverText();
-            }
-            else if (gameState.GameOver)
-            {
-                gameTickTimer.Stop();
-                won = false;
-                ShowGameOverText();
+                if (!gameState.GameOver && gameState.CheckWinCondition())
+                {
+                    gameTickTimer.Stop();
+                    won = true;
+                    ShowGameOverText();
+                }
+                else if (gameState.GameOver)
+                {
+                    gameTickTimer.Stop();
+                    won = false;
+                    ShowGameOverText();
+                }
             }
         }
 
@@ -300,6 +335,54 @@ namespace SnakeGame
             startOverButton.BringToFront();
         }
 
+        private void ShowGamePausedText()
+        {
+            Label label;
+            if (gameIsPaused)
+            {
+                label = gamePausedLabel;
+                label.Visible = true;
+            }
+            else
+            {
+                label = gamePausedLabel;
+                label.Visible = false;
+            }
+            label.Left = (this.ClientSize.Width - label.Width) / 2;
+            label.Top = (this.ClientSize.Height - label.Height) / 2;
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void startOverToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StopGame();
+            ResetGame();
+        }
+
+        private void easyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            snakeSpeed = 350;
+            DoubleBuffered = true;
+            ResetGame();
+        }
+
+        private void mediumToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            snakeSpeed = 200;
+            DoubleBuffered = true;
+            ResetGame();
+        }
+
+        private void hardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            snakeSpeed = 50;
+            DoubleBuffered = true;
+            ResetGame();
+        }
+
         private void ResetGame()
         {
             gameState = new GameState(rows, cols);
@@ -309,8 +392,40 @@ namespace SnakeGame
             gameOverLabel.Visible = false;
             winLabel.Visible = false;
             startOverButton.Visible = false;
+            gamePausedLabel.Visible = false;
+            startGameButton.Visible = true;
+
+            gameIsPaused = true;
+            gameIsRunning = false;
             this.Focus();
             gameTickTimer.Start();
+        }
+
+        private void pauseGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (gameIsRunning)
+            {
+                if (gameIsPaused)
+                {
+                    gameIsPaused = false;
+                    gameTickTimer.Start();
+                }
+                else
+                {
+                    gameIsPaused = true;
+                    gameTickTimer.Stop();
+                }
+                if (!gameState.GameOver)
+                {
+                    ShowGamePausedText();
+
+                }
+            }
+        }
+
+        private void StopGame()
+        {
+            gameTickTimer.Stop();
         }
     }
 }

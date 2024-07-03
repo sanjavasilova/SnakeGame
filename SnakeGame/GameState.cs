@@ -10,6 +10,7 @@ public class GameState
     public Direction Dir { get; set; }
     public int Score { get; set; }
     public bool GameOver { get; set; }
+    public int generateApple = 5000;
 
     private LinkedList<Position> snakePosition = new LinkedList<Position>();
     private Random random = new Random();
@@ -20,7 +21,6 @@ public class GameState
         Columns = cols;
         Grid = new GridValue[Rows, Columns];
         Dir = Direction.Right;
-
         AddSnake();
         AddFood();
     }
@@ -62,7 +62,7 @@ public class GameState
         Position position = empty[random.Next(empty.Count)];
         Grid[position.Row, position.Column] = GridValue.Apple;
 
-        var timer = new System.Timers.Timer(5000);
+        var timer = new System.Timers.Timer(generateApple);
         timer.Elapsed += (sender, e) =>
         {
             if (Grid[position.Row, position.Column] == GridValue.Apple)
@@ -175,4 +175,5 @@ public class GameState
         double occupiedPercentage = (double)occupiedCells / totalCells;
         return occupiedPercentage >= 0.5; 
     }
+
 }
