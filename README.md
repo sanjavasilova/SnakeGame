@@ -27,6 +27,7 @@ Snake Game направена од: Сања Василова, Ивана Пен
  public Direction Dir { get; set; }
  public int Score { get; set; }
  public bool GameOver { get; set; }
+ public int generateApple = 5000;
 
  private LinkedList<Position> snakePosition = new LinkedList<Position>();
  private Random random = new Random();
@@ -43,7 +44,7 @@ Snake Game направена од: Сања Василова, Ивана Пен
  }
 ```
 Иницијализираме 6 променливи:
-- Rows и Columns го означуваат бројот на редови и колони на табелата соодветно, додека Score го означува моменталниот резултат на играта. Сите три проментливи се од тип integer.
+- Rows и Columns го означуваат бројот на редови и колони на табелата соодветно, Score го означува моменталниот резултат на играта, додека generateApple ги означува милисекундите за ресетирање на позицијата на јаболкото. Сите четири проментливи се од тип integer.
 - Grid која претставува дводимензионална низа, објект од класата GridValue
 - Dir претставува објект на класата Direction
 - GameOver е од тип boolean и ако нејзината вредност е true што значи дека играта е завршена
@@ -82,7 +83,7 @@ private void AddFood()
     Position position = empty[random.Next(empty.Count)];
     Grid[position.Row, position.Column] = GridValue.Apple;
 
-    var timer = new System.Timers.Timer(5000);
+    var timer = new System.Timers.Timer(generateApple);
     timer.Elapsed += (sender, e) =>
     {
         if (Grid[position.Row, position.Column] == GridValue.Apple)
@@ -94,7 +95,7 @@ private void AddFood()
     timer.Start();
 }
 ```
-Функцијата AddFood() случајно поставува јаболко во табелата за игра на празна позиција. Ако нема празни позиции, не се додава јаболко. Поставеното јаболко ја означува со вредноста GridValue.Apple во табелата Grid. Потоа, се стартува тајмер кој ќе го отстрани јаболкото по истекувањето на 5 секунди, доколку остане неизедено.
+Функцијата AddFood() случајно поставува јаболко во табелата за игра на празна позиција. Ако нема празни позиции, не се додава јаболко. Поставеното јаболко ја означува со вредноста GridValue.Apple во табелата Grid. Потоа, се стартува тајмер кој ќе го отстрани јаболкото по истекувањето на милисекундите зададени во променливата generateApple (5000ms=5s), доколку остане неизедено.
 
 ### Методот EmptyPositions():
 ```angular2html
@@ -117,20 +118,20 @@ private void AddFood()
 
 ### Функциите HeadPosition(), TailPosition(), SnakePositions():
 ```angular2html
-    public Position HeadPosition()
-    {
-        return snakePosition.First.Value;
-    }
+public Position HeadPosition()
+{
+    return snakePosition.First.Value;
+}
 
-    public Position TailPosition()
-    {
-        return snakePosition.Last.Value;
-    }
+public Position TailPosition()
+{
+    return snakePosition.Last.Value;
+}
 
-    public IEnumerable<Position> SnakePositions()
-    {
-        return snakePosition;
-    }
+public IEnumerable<Position> SnakePositions()
+{
+    return snakePosition;
+}
 ```
 HeadPosition(): Ја враќа позицијата на првиот дел (главата) на змијата.
 
@@ -140,10 +141,138 @@ SnakePositions(): Ги враќа сите позиции на змијата к
 
 ### Методот AddHead(Position position):
 ```angular2html
-    private void AddHead(Position position)
-    {
-        snakePosition.AddFirst(position);
-        Grid[position.Row, position.Column] = GridValue.Snake;
-    }
+private void AddHead(Position position)
+{
+    snakePosition.AddFirst(position);
+    Grid[position.Row, position.Column] = GridValue.Snake;
+}
 ```
 Функцијата AddHead(Position position) додава нов дел (глава) на змијата во играта. Ја поставува новата позиција како прв елемент во листата snakePosition и го означува тоа место како дел од змијата во табелата Grid.
+
+### Методот RemoveTail()
+```angular2html
+private void RemoveTail()
+{
+    Position tail = snakePosition.Last.Value;
+    Grid[tail.Row, tail.Column] = GridValue.Empty;
+    snakePosition.RemoveLast();
+}
+```
+Функцијата RemoveTail() го отстранува последниот дел (опашот) од змијата во играта. Ја означува позицијата на опашот како празна во табелата Grid и ја отстранува од листата snakePosition, што го ажурира редоследот на деловите на змијата.
+
+### Методот ChangeDirection(Direction direction)
+```angular2html
+public void ChangeDirection(Direction direction)
+{
+    if (Dir.IsOpposite(direction)) return;
+    
+    Dir = direction;
+}
+```
+
+Функцијата ChangeDirection(Direction direction) ја менува насоката на движење на змијата во играта. Проверува дали новиот правец не е спротивен на тековниот и, ако не е, го ажурира правецот на змијата.
+
+### Методот OutsideGrid(Position position)
+```angular2html
+private bool OutsideGrid(Position position)
+{
+    return position.Row < 0 || position.Row >= Rows || position.Column < 0 || position.Column >= Columns;
+}
+```
+
+Функцијата OutsideGrid(Position position) проверува дали дадената позиција (position) е во границите на табелата за игра. Aко позицијата е надвор од било која од границите (редот е помал од 0 или поголем или еднаков на Rows, или колоната е помала од 0 или поголема или еднаква на Columns), враќа true; инаку, враќа false.
+
+### Методот Hit(Position newHeadPosition)
+```angular2html
+private GridValue Hit(Position newHeadPosition)
+{
+    if (OutsideGrid(newHeadPosition))
+    {
+        return GridValue.Out;
+    }
+
+    if (newHeadPosition == TailPosition())
+    {
+        return GridValue.Empty;
+    }
+
+    return Grid[newHeadPosition.Row, newHeadPosition.Column];
+}
+```
+
+Функцијата Hit(Position newHeadPosition) проверува дали новата позиција на главата на змијата удрила во некој објект во играта и враќа соодветна вредност од типот GridValue:
+
+- Ако новата позиција е надвор од границите на табелата, враќа GridValue.Out.
+- Ако новата позиција се совпаѓа со позицијата на репот на змијата, враќа GridValue.Empty.
+- Во секој друг случај, враќа вредност од табелата Grid на новата позиција на главата на змијата.
+
+### Методот Move()
+```angular2html
+public void Move()
+{
+    if (GameOver) return;
+
+    Position newHeadPos = HeadPosition().Translate(Dir);
+    GridValue hit = Hit(newHeadPos);
+
+    if (hit == GridValue.Out || hit == GridValue.Snake)
+    {
+        foreach (var position in snakePosition)
+        {
+            Grid[position.Row, position.Column] = GridValue.DeadBody;
+        }
+        Grid[HeadPosition().Row, HeadPosition().Column] = GridValue.DeadHead;
+        GameOver = true;
+    }
+    else if (hit == GridValue.Empty)
+    {
+        RemoveTail();
+        AddHead(newHeadPos);
+    }
+    else if (hit == GridValue.Apple)
+    {
+        AddHead(newHeadPos);
+        Score++;
+        AddFood();
+    }
+}
+```
+
+Функцијата Move() се користи за да се изврши едно движење на змијата во играта. Во кратки црти:
+
+- Се проверува дали играта е завршена (GameOver). Ако е така, функцијата завршува без дејствие.
+
+- Се пресметува новата позиција на главата на змијата во одреден правец.
+
+- Се проверува дали новата позиција удрила во некоја пречка, како ѕид (GridValue.Out), змија (GridValue.Snake), или ако е празна (GridValue.Empty).
+
+- Во зависност од резултатот:
+
+  - Ако удрила во ѕид или друга змија, змијата се означува како мртва и играта завршува (GameOver).
+  - Ако резултатот бил празно место, се отстранува опашот на змијата и се додава нова глава на змијата на новата позиција.
+  - Ако го изела јаболкото (GridValue.Apple), се додава нова глава на змијата, се зголемува бројот на поени (Score), и се додава ново јаболко.
+
+Оваа функција игра клучна улога во движењето и интеракцијата на змијата со околината во играта.
+
+### Методот CheckWinCondition()
+```angular2html
+public bool CheckWinCondition()
+{
+    int totalCells = Rows * Columns;
+    int occupiedCells = 0;
+
+    foreach (var value in Grid)
+    {
+        if (value == GridValue.Snake || value == GridValue.Apple)
+        {
+            occupiedCells++;
+        }
+    }
+
+    double occupiedPercentage = (double)occupiedCells / totalCells;
+    return occupiedPercentage >= 0.5; 
+}
+```
+Функцијата CheckWinCondition() ја проверува состојбата на играта за да одреди дали играчот га исполнува условот за победа. Таа враќа true доколку 50% или повеќе од ќелиите во табелата се исполнети со змија и јаболко.
+
+## Screenshots од изгледот на играта
