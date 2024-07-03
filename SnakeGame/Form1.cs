@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace SnakeGame
@@ -21,9 +22,12 @@ namespace SnakeGame
         private int snakeSpeed = 350;
         private bool gameIsPaused = true;
         private bool gameIsRunning = false;
+        private ToolStripMenuItem selectedDifficulty;
+
         public Form1()
         {
             InitializeComponent();
+            selectedDifficulty = easyToolStripMenuItem;
             InitializeGameResources();
             InitializeGame();
         }
@@ -35,7 +39,14 @@ namespace SnakeGame
             this.Font = new Font("Droid Sans Mono", 12, FontStyle.Regular);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.menuStrip1.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
-            
+            this.menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
+
+            foreach (ToolStripMenuItem item in menuStrip1.Items)
+            {
+                AddCursorEvents(item);
+                AddCursorEventsToDropDownItems(item);
+            }
+
 
             string iconFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Icon.ico");
             if (File.Exists(iconFilePath))
@@ -46,6 +57,68 @@ namespace SnakeGame
             {
                 MessageBox.Show("Icon file not found.");
             }
+        }
+
+        private class MyRenderer : ToolStripProfessionalRenderer
+        {
+            private ToolStripMenuItem selectedDifficulty;
+
+            public MyRenderer(ToolStripMenuItem selectedDifficulty)
+            {
+                this.selectedDifficulty = selectedDifficulty;
+            }
+
+            protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+            {
+                base.OnRenderMenuItemBackground(e);
+
+                Color backgroundColor = (e.Item.Selected || e.Item == selectedDifficulty) ? Color.FromArgb(60, 60, 90) : Color.FromArgb(49, 44, 64);
+
+                using (SolidBrush brush = new SolidBrush(backgroundColor))
+                {
+                    e.Graphics.FillRectangle(brush, new Rectangle(Point.Empty, e.Item.Size));
+                }
+                selectedDifficulty.BackColor = Color.FromArgb(60, 60, 90);
+            }
+
+            protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
+            {
+                base.OnRenderItemText(e);
+
+                ToolStripMenuItem item = e.Item as ToolStripMenuItem;
+                if (item != null)
+                {
+                    e.Item.ForeColor = Color.White;
+                }
+            }
+        }
+
+        private void AddCursorEvents(ToolStripMenuItem item)
+        {
+            item.MouseEnter += MenuItem_MouseEnter;
+            item.MouseLeave += MenuItem_MouseLeave;
+        }
+
+        private void AddCursorEventsToDropDownItems(ToolStripMenuItem item)
+        {
+            foreach (ToolStripItem subItem in item.DropDownItems)
+            {
+                if (subItem is ToolStripMenuItem dropdownItem)
+                {
+                    AddCursorEvents(dropdownItem);
+                    AddCursorEventsToDropDownItems(dropdownItem);
+                }
+            }
+        }
+
+        private void MenuItem_MouseEnter(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.Hand;
+        }
+
+        private void MenuItem_MouseLeave(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.Default;
         }
 
         private void InitializeGame()
@@ -351,10 +424,6 @@ namespace SnakeGame
             label.Left = (this.ClientSize.Width - label.Width) / 2;
             label.Top = (this.ClientSize.Height - label.Height) / 2;
         }
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
 
         private void startOverToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -365,22 +434,25 @@ namespace SnakeGame
         private void easyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             snakeSpeed = 350;
-            DoubleBuffered = true;
+            selectedDifficulty = easyToolStripMenuItem;
             ResetGame();
+            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
         }
 
         private void mediumToolStripMenuItem_Click(object sender, EventArgs e)
         {
             snakeSpeed = 200;
-            DoubleBuffered = true;
+            selectedDifficulty = mediumToolStripMenuItem;
             ResetGame();
+            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
         }
 
         private void hardToolStripMenuItem_Click(object sender, EventArgs e)
         {
             snakeSpeed = 50;
-            DoubleBuffered = true;
+            selectedDifficulty = hardToolStripMenuItem;
             ResetGame();
+            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
         }
 
         private void ResetGame()
@@ -394,10 +466,12 @@ namespace SnakeGame
             startOverButton.Visible = false;
             gamePausedLabel.Visible = false;
             startGameButton.Visible = true;
+            won = false;
 
             gameIsPaused = true;
             gameIsRunning = false;
             this.Focus();
+            gameTickTimer.Interval = snakeSpeed;
             gameTickTimer.Start();
         }
 
@@ -415,12 +489,20 @@ namespace SnakeGame
                     gameIsPaused = true;
                     gameTickTimer.Stop();
                 }
+                pauseGameToolStripMenuItem.Text = gameIsPaused ? "Resume Game" : "Pause Game";
+
+                pauseGameToolStripMenuItem.Invalidate();
                 if (!gameState.GameOver)
                 {
                     ShowGamePausedText();
 
                 }
             }
+        }
+
+        private void changeModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectedDifficulty.BackColor = Color.FromArgb(60, 60, 60);
         }
 
         private void StopGame()

@@ -35,11 +35,11 @@
             this.tableGrid = new System.Windows.Forms.TableLayoutPanel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.startOverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pauseGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changeModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.easyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mediumToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pauseGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,7 +81,7 @@
             this.tableGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 33F));
+            this.tableGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 36F));
             this.tableGrid.Location = new System.Drawing.Point(189, 65);
             this.tableGrid.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tableGrid.Name = "tableGrid";
@@ -101,7 +101,7 @@
             this.tableGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableGrid.Size = new System.Drawing.Size(459, 438);
+            this.tableGrid.Size = new System.Drawing.Size(462, 438);
             this.tableGrid.TabIndex = 0;
             // 
             // menuStrip1
@@ -125,6 +125,13 @@
             this.startOverToolStripMenuItem.Text = "Start Over";
             this.startOverToolStripMenuItem.Click += new System.EventHandler(this.startOverToolStripMenuItem_Click);
             // 
+            // pauseGameToolStripMenuItem
+            // 
+            this.pauseGameToolStripMenuItem.Name = "pauseGameToolStripMenuItem";
+            this.pauseGameToolStripMenuItem.Size = new System.Drawing.Size(103, 24);
+            this.pauseGameToolStripMenuItem.Text = "Pause Game";
+            this.pauseGameToolStripMenuItem.Click += new System.EventHandler(this.pauseGameToolStripMenuItem_Click);
+            // 
             // changeModeToolStripMenuItem
             // 
             this.changeModeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -134,6 +141,7 @@
             this.changeModeToolStripMenuItem.Name = "changeModeToolStripMenuItem";
             this.changeModeToolStripMenuItem.Size = new System.Drawing.Size(116, 24);
             this.changeModeToolStripMenuItem.Text = "Change Mode";
+            this.changeModeToolStripMenuItem.Click += new System.EventHandler(this.changeModeToolStripMenuItem_Click);
             // 
             // easyToolStripMenuItem
             // 
@@ -156,13 +164,6 @@
             this.hardToolStripMenuItem.Text = "Hard";
             this.hardToolStripMenuItem.Click += new System.EventHandler(this.hardToolStripMenuItem_Click);
             // 
-            // pauseGameToolStripMenuItem
-            // 
-            this.pauseGameToolStripMenuItem.Name = "pauseGameToolStripMenuItem";
-            this.pauseGameToolStripMenuItem.Size = new System.Drawing.Size(103, 24);
-            this.pauseGameToolStripMenuItem.Text = "Pause Game";
-            this.pauseGameToolStripMenuItem.Click += new System.EventHandler(this.pauseGameToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -176,7 +177,6 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "Snake Game";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
