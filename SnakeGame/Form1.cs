@@ -38,7 +38,6 @@ namespace SnakeGame
             this.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
             this.Font = new Font("Droid Sans Mono", 12, FontStyle.Regular);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.menuStrip1.ForeColor = ColorTranslator.FromHtml(Properties.Resources.TextColor);
             this.menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
 
             foreach (ToolStripMenuItem item in menuStrip1.Items)
@@ -64,6 +63,11 @@ namespace SnakeGame
             private ToolStripMenuItem selectedDifficulty;
 
             public MyRenderer(ToolStripMenuItem selectedDifficulty)
+            {
+                this.selectedDifficulty = selectedDifficulty;
+            }
+
+            public void setSelectedDifficulty(ToolStripMenuItem selectedDifficulty)
             {
                 this.selectedDifficulty = selectedDifficulty;
             }
@@ -436,7 +440,7 @@ namespace SnakeGame
             snakeSpeed = 350;
             selectedDifficulty = easyToolStripMenuItem;
             ResetGame();
-            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
+            changeRendererDifficulty();
         }
 
         private void mediumToolStripMenuItem_Click(object sender, EventArgs e)
@@ -444,7 +448,7 @@ namespace SnakeGame
             snakeSpeed = 200;
             selectedDifficulty = mediumToolStripMenuItem;
             ResetGame();
-            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
+            changeRendererDifficulty();
         }
 
         private void hardToolStripMenuItem_Click(object sender, EventArgs e)
@@ -452,7 +456,15 @@ namespace SnakeGame
             snakeSpeed = 50;
             selectedDifficulty = hardToolStripMenuItem;
             ResetGame();
-            menuStrip1.Renderer = new MyRenderer(selectedDifficulty);
+            changeRendererDifficulty();
+        }
+
+        private void changeRendererDifficulty()
+        {
+            if (menuStrip1.Renderer is MyRenderer menuRenderer)
+            {
+                menuRenderer.setSelectedDifficulty(selectedDifficulty);
+            }
         }
 
         private void ResetGame()

@@ -286,11 +286,15 @@ public bool CheckWinCondition()
 
   ![SnakeChangeModeMenu](Screenshots/SnakeChangeModeMenu.jpg)
 
- Доколку изгубиме (змијата ја удриме самата во себе или во ѕид) изгледот на екранот е следниот:
+ 
+Доколку играта ја паузираме изгледод на екранот е следниот:
+![GamePaused](Screenshots/GamePaused.jpg)
+Доколку сакаме да продолжиме со играта треба да се кликне копчето Resume Game и истата продолжува каде што застанала.
+
+Доколку изгубиме (змијата ја удриме самата во себе или во ѕид) изгледот на екранот е следниот:
 ![GameOverScreenshot](Screenshots/GameOverScreenshot.jpg)
 
 Доколку победиме (змијата исполнува 50% од табелата) изгледот на екранот е следниот:
 ![YouWon](Screenshots/YouWonScreenshot.jpg)
 
 Откако ќе победиме или изгубиме се појавува копче Start Over за повторно да ја започнеме играта.
- 
