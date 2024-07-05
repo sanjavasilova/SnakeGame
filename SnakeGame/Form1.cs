@@ -481,6 +481,7 @@ namespace SnakeGame
             won = false;
 
             gameIsPaused = true;
+            pauseGameToolStripMenuItem.Text = "Pause Game";
             gameIsRunning = false;
             this.Focus();
             gameTickTimer.Interval = snakeSpeed;
