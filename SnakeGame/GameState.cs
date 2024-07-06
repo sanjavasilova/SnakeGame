@@ -10,6 +10,7 @@ public class GameState
     public Direction Dir { get; set; }
     public int Score { get; set; }
     public bool GameOver { get; set; }
+    public bool GamePaused { get; set; }
     public int generateApple = 5000;
 
     private LinkedList<Position> snakePosition = new LinkedList<Position>();
@@ -21,6 +22,7 @@ public class GameState
         Columns = cols;
         Grid = new GridValue[Rows, Columns];
         Dir = Direction.Right;
+        GamePaused = true;
         AddSnake();
         AddFood();
     }
@@ -65,7 +67,7 @@ public class GameState
         var timer = new System.Timers.Timer(generateApple);
         timer.Elapsed += (sender, e) =>
         {
-            if (Grid[position.Row, position.Column] == GridValue.Apple)
+            if (Grid[position.Row, position.Column] == GridValue.Apple && !GamePaused)
             {
                 Grid[position.Row, position.Column] = GridValue.Empty;
                 AddFood();

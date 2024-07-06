@@ -304,6 +304,7 @@ namespace SnakeGame
                 startGameButton.Visible = false;
                 gameIsRunning = true;
                 gameIsPaused = false;
+                gameState.GamePaused = false;
                 this.Focus();
 
             }
@@ -503,12 +504,12 @@ namespace SnakeGame
                     gameTickTimer.Stop();
                 }
                 pauseGameToolStripMenuItem.Text = gameIsPaused ? "Resume Game" : "Pause Game";
+                gameState.GamePaused = gameIsPaused;
 
                 pauseGameToolStripMenuItem.Invalidate();
                 if (!gameState.GameOver)
                 {
                     ShowGamePausedText();
-
                 }
             }
         }
